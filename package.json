@@ -6,13 +6,24 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "axios": "^0.19.1",
+    "bootstrap": "^4.4.1",
+    "html2canvas": "^1.0.0-rc.5",
+    "http-proxy-middleware": "^0.20.0",
+    "markdown-it": "^10.0.0",
+    "markdown-it-emoji": "^1.4.0",
     "react": "^16.12.0",
+    "react-bootstrap": "^1.0.0-beta.16",
+    "react-color": "^2.17.3",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0"
+    "react-markdown-editor-lite": "^0.5.1",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.3.0",
+    "styled-components": "^4.4.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env NODE_PATH=src react-scripts start",
+    "build": "cross-env NODE_PATH=src react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -30,5 +41,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^6.0.3"
   }
 }
