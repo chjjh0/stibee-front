@@ -167,6 +167,7 @@ const CustomModal = styled.div`
 
 function PostMain({ posts }) {
   const postItem = [stibeeLetter, lush, newneek, moneyLetter];
+  const [currentPost, setCurrentPost] = useState({})
   const tagDummy = ['미디어', '스타트업'];
   const [item, setItem] = useState([]);
   const [more, setMore] = useState(false);
@@ -180,8 +181,9 @@ function PostMain({ posts }) {
     // console.log('paginationRef: ', paginationRef.current);
   }, [posts])
 
-  const handleSelectTag = (tagName) => {
-    // console.log('tagName: ', tagName);
+  const handleSelectTag = (e, tagName) => {
+    e.stopPropagation();
+    console.log('tagName: ', tagName);
     
   }
 
@@ -221,17 +223,27 @@ function PostMain({ posts }) {
   }
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleShow = (postIdx) => {
+    setCurrentPost(item[postIdx]);
+    setShow(true);
+  }
+
+  useEffect(() => {
+    // setShow(true);
+  }, [currentPost]);
 
   return (
     <Main>
       <ItemUl>
         {
           item.map((item, idx) => (
-            <ItemLi key={idx} onClick={handleShow}>
+            <ItemLi 
+              key={idx} 
+              onClick={() => handleShow(idx)}
+            >
               <ItemBox>
                 <ImgBox>
-                  <ItemImg src={`data:image/png;base64,${item.screenshot}`} />
+                  <ItemImg src={item.screenshot} />
                 </ImgBox>
 
                 <ItemCont>
@@ -243,8 +255,8 @@ function PostMain({ posts }) {
               <TagBox>
                 <TagUl>
                   {
-                    tagDummy.map((tag, idx) => (
-                      <TagLi key={idx} onClick={() => handleSelectTag(tag)}>{tag}</TagLi>
+                    item.tags.map((tag, idx) => (
+                      <TagLi key={idx} onClick={(e) => handleSelectTag(e, tag)}>{tag}</TagLi>
                     ))
                   }
                 </TagUl>
@@ -261,11 +273,15 @@ function PostMain({ posts }) {
 
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <PostDetailHeader />
+          <PostDetailHeader 
+            currentPost={currentPost}
+          />
         </Modal.Header>
 
         <Modal.Body scrollable="true">
-          <PostDetailBody />
+          <PostDetailBody 
+            currentPost={currentPost}
+          />
         </Modal.Body>
 
       </Modal>  

@@ -22,6 +22,7 @@ const PreviewImg = styled.img`
 
 const WriteArea = styled.div`
   width: 100%;
+  height: 100vh;
   padding: 5% 5%;
 `;
 
@@ -66,7 +67,7 @@ const TitleInput = styled.input`
   padding: 1%;
 `;
 
-function MailWrite() {
+function MailWrite({ update, postId }) {
   // submit data
   const [title, setTitle] = useState('');
   const [cont, setCont] = useState({ mdCont: "", htmlCont: "" });
@@ -76,21 +77,23 @@ function MailWrite() {
   // tag
   const [tags, setTags] = useState([]);
   // color
-  const [colorPicker, setColorPicker] = useState([]);
+  const [colors, setColors] = useState([]);
   let colorUID = useRef(1);
+  let mdEditorRef = useRef('');
   // markdown editor
-  const [mdParser, setmdParser] = useState(function() {
-    return new MarkdownIt().use(emoji);
-  });
+  const [mdParser, setmdParser] = useState(() => new MarkdownIt().use(emoji));
   const [imgBlob, setImgBlob] = useState([]);
   
   const [show, setShow] = useState(false);
   
   const { mdCont, htmlCont } = cont;
+  let mdEditor = null;
 
   useEffect(function() {
-    console.log('useEffect')
-    
+    console.log('mailWrite', update, postId)
+    if (update) {
+      fetchPostbyId();
+    }
   }, [])
 
 // func
@@ -137,6 +140,7 @@ const handleScreenshot = () => {
 }
 
 const handleEditorChange = ({ html, text }) => {
+  console.log('mdChange', text, html);
   setCont({
     mdCont: text.trim(),
     htmlCont: html
@@ -170,27 +174,49 @@ const convertBlobToBase64 = (blob) => {
 
     reader.readAsDataURL(blob);
   })
-  
 }
 
+const fetchPostbyId = () => {
+    Axios.post(`/api/post/postOrigin/${postId}`)
+      .then(res => {
+        const { title, mdCont, htmlCont, tags, colors } = res.data.post
+        console.log('성공', res);
+        if (res.data.post.mdCont.length !== 0) {
+          setCont({ mdCont, htmlCont });
+          setTitle(title);
+          setTags(tags);
+          if (colors.length !== 0) {
+            setColors(colors)
+          }
+        }
+      })
+      .catch(err => {
+        console.log('err', err);
+        alert('잘못된 접근입니다.')
+      })
+  }
+
 const handleImageUpload = (file, callback) => {
+  return alert('이미지 업로드 불가');
   console.log('image',file, callback)
   const reader = new FileReader()
   reader.onload = () => {      
     console.log('result', reader.result)
-    const blob = convertBase64UrlToBlob(reader.result);
-    const blobURL = window.URL.createObjectURL(blob);
+    const blobObj = convertBase64UrlToBlob(reader.result);
+    const blobURL = window.URL.createObjectURL(blobObj);
 
     setImgBlob([
       ...imgBlob,
       {
-        blobObj: blob,
-        blobURL: blobURL
+        blobObj,
+        blobURL,
+        base64URL: reader.result
       }
     ]);
 
     setTimeout(() => {
       callback(blobURL)
+      // callback(reader.result)
     }, 1000)
   }
   console.log('시작')
@@ -198,34 +224,27 @@ const handleImageUpload = (file, callback) => {
 }
 
 const handleSubmit = () => {
-    const submitData = {
-      title,
-      screenshot: canvasImg,
-      mdCont,
-      htmlCont,
-      tags,
-      colorPicker
-    }
-  
-    console.log('handleSubmit', submitData);
-    // Axios.post('/api/post/save', submitData)
-    //   .then(res => {
-    //     console.log('mail 완료', res);
-    //   })
-}
-
-const handleSave = () => {
-  if (mdCont === "" || htmlCont === "" || tags.length === 0) {
-    alert('내용을 입력해주세요.')
-  } else {
-    const imgTag = document.querySelectorAll('.html-wrap img');
-
-    handleConvertBlobToBase64(imgTag)
-      .then(handleScreenshot)
-      .then(handleSubmit)
+  console.log('submit', mdEditorRef.current.state.html);
+  const submitData = {
+    title,
+    screenshot: canvasImg,
+    mdCont,
+    htmlCont,
+    tags,
+    colors
   }
+  
+  console.log('handleSubmit', submitData);
+  Axios.post('/api/post/save', submitData)
+    .then(res => {
+      console.log('write 완료', res);
+    })
+    .catch(err => {
+      console.log('write err: ', err);
+    })
 }
-
+// 미리보기용 html2canvas 이용 시 img 태그의 경우 base64 이미지를 스크린샷으로 전환 가능 다른 형식이면 불가능
+// 미리보기, 저장 시 필요한 함수
 const handleConvertBlobToBase64 = (imgTag) => {
   return new Promise((resolve, reject) => {
     if (imgTag.length > 0) {
@@ -245,59 +264,96 @@ const handleConvertBlobToBase64 = (imgTag) => {
         })
       })
     } else {
+      console.log('blobTobase64');
       resolve(true);
     }
   })
 }
+const updateReq = () => {
+  const submitData = {
+    title,
+    screenshot: canvasImg,
+    mdCont,
+    htmlCont,
+    tags,
+    colors
+  }
+  
+  console.log('handleupdate', submitData);
+  Axios.put(`/api/post/update/${postId}`, submitData)
+    .then(res => {
+      console.log('update 성공', res);
+    })
 
-const handlePreview = () => {
-  // document.createElement로 생성한 형태가 html2canvas에 적용되지 않아 일단 queryselector로 진행
-  const imgTag = document.querySelectorAll('.html-wrap img');
-  handleConvertBlobToBase64(imgTag)
-    .then(handleScreenshot)
-    .then(handleShow)
-    .catch((res) => { console.log('err', res ); })
 }
 
-const handleColorPickerChange = (e) => {
-  // 선택 3개로 제한
-  const limitColorPic = colorPicker.length;
-  console.log('color change', e.hex)
-  if (limitColorPic < 3) {
-    console.log('변경', colorUID.current)
-    setColorPicker([
-      ...colorPicker,
-      {
-        id: colorUID.current++,
-        hexVal: e.hex
-      }
-    ])
+const handleUpdate = () => {
+  console.log('handleupdate');
+
+  // color는 필수가 아닌 옵션
+  if (title === "" || mdCont === "" || htmlCont === "" || tags.length === 0) {
+    alert('내용을 입력해주세요.')
+  } else {
+    const imgTag = document.querySelectorAll('.html-wrap img');
+
+    handleConvertBlobToBase64(imgTag)
+      .then(handleScreenshot)
+      // .then(handleConvertBlobToBase64(imgTag))
+      .then(updateReq)
   }
+}
+
+const handleSave = () => {
+  // color는 필수가 아닌 옵션
+  if (title === "" || mdCont === "" || htmlCont === "" || tags.length === 0) {
+    alert('내용을 입력해주세요.')
+  } else {
+    const imgTag = document.querySelectorAll('.html-wrap img');
+
+    handleConvertBlobToBase64(imgTag)
+      .then(handleScreenshot)
+      // .then(handleConvertBlobToBase64(imgTag))
+      .then(handleSubmit)
+  }
+}
+
+
+
+const handlePreview = () => {
+
+  if (mdCont !== "") {
+    // document.createElement로 생성한 형태가 html2canvas에 적용되지 않아 일단 queryselector로 진행
+    const imgTag = document.querySelectorAll('.html-wrap img');
+    console.log('진입 전');
+    handleConvertBlobToBase64(imgTag)
+      .then(handleScreenshot)
+      .then(handleShow)
+      .catch((res) => { console.log('err', res ); })
+  } else {
+    alert('미리보기 할 내용이 없습니다.')
+  }
+  
 }
 
 const handleInput = e => {
   console.log('input', e.target.value);
-  setTitle(e.target.value.trim());
+  setTitle(e.target.value);
 }
 
 // colorPicker
 const handleColorChange = (e) => {
   // 선택 3개로 제한
-  const { hex } = e;
-  const limitColorPic = colorPicker.length;
-  console.log('1 color change', e.hex)
-  // if (limitColorPic > 3) return false;
-  // console.log('2 본격 비교')
-  if (validDuplicateColor(hex)) {
+  const limitColorPic = colors.length;
+  if (validDuplicateColor(e.hex)) {
   } else {
-    addColor(hex);
+    addColor(e.hex);
   }
 }
 
 const addColor = (hex) => {
-  if (colorPicker.length < 3) {
-    setColorPicker([
-      ...colorPicker,
+  if (colors.length < 3) {
+    setColors([
+      ...colors,
       {
         id: colorUID.current++,
         hex
@@ -307,10 +363,10 @@ const addColor = (hex) => {
     console.log('3개까지 추가 가능')
   }
 }
-
+ 
 const validDuplicateColor = (currentHex) => {
   let res = false;
-  colorPicker.map(colorObj => {
+  colors.map(colorObj => {
     if (currentHex === colorObj.hex) {
       cancelColorPicker(currentHex);
       // handleColorChange에서 호출 반환값
@@ -323,8 +379,8 @@ const validDuplicateColor = (currentHex) => {
 }
 
 const cancelColorPicker = (currentHex) => {
-  setColorPicker(
-    colorPicker.filter(({ hex }) => {
+  setColors(
+    colors.filter(({ hex }) => {
       return (hex !== currentHex);
     })
   )
@@ -345,16 +401,18 @@ const handleShow = () => setShow(true);
       </TitleArea>
 
       <MdEditor
+        style={{ height: '50%' }}
+        ref={mdEditorRef}
         value={mdCont}
         renderHTML={(text) => mdParser.render(text)}
         onChange={handleEditorChange}
-        onImageUpload={handleImageUpload}
+        onImageUpload={false}
       />  
 
       <OptionArea>
         <ColorPicContainer 
           handleColorChange={handleColorChange}
-          colorPicker={colorPicker}
+          colorPicker={colors}
           cancelColorPicker={cancelColorPicker}
         />
 
@@ -365,16 +423,27 @@ const handleShow = () => setShow(true);
       </OptionArea>
 
       <BtnArea>
-        <BasicBtn 
-          func={handleSave}
-          btnName='저장'
-          style={saveBtnStyle}
-        />
+        {
+          update ? 
+          <BasicBtn 
+            func={handleUpdate}
+            btnName='수정'
+            style={saveBtnStyle}
+          /> :
+          <BasicBtn 
+            func={handleSave}
+            btnName='저장'
+            style={saveBtnStyle}
+          />
+        }
+
         <BasicBtn 
           func={handlePreview}
           btnName='미리보기'
           style={previewBtnStyle}
         />
+        
+        
       </BtnArea>
 
       <Modal show={show} onHide={handleClose}>

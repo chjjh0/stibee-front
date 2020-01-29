@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 
@@ -17,19 +17,8 @@ const Title = styled.h1`
   line-height: 1.6;
 `;
 
-const SubTitle = styled.h2`
-  font-size: 14px;
-  display: inline-block;
-
-  @media screen and (max-width: 640px) {
-    display: block;
-    padding: 0;
-  }
-`;
-
 const CreatedAt = styled.span`
   display: inline-block;
-  padding: 0 0 0 10px;
   color: #b4b4b4;
 
   @media screen and (max-width: 640px) {
@@ -38,12 +27,22 @@ const CreatedAt = styled.span`
   }
 `;
 
-function PostDetailHeader() {
+function PostDetailHeader({ currentPost }) {
+  const [date, setDate] = useState('');
+
+  const changeDate = () => {
+    // "2020-01-21T18:59:36.774Z"
+    setDate(currentPost.updatedAt.split('T')[0]);
+  }
+ 
+  useEffect(() => {
+    changeDate()
+  }, [currentPost]);
+
   return (
       <Header>
-        <Title>스티비 스요레터</Title>
-        <SubTitle>구독자님, 우리 이제 매주 만나요!</SubTitle>
-        <CreatedAt>2019.11.4</CreatedAt>
+        <Title>{currentPost.title}</Title>
+        <CreatedAt>{date}</CreatedAt>
       </Header>
   )
 }
