@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-// img
-import stibeeLetter from 'asset/img/post/stibee_letter.png';
-import lush from 'asset/img/post/lush.png';
-import moneyLetter from 'asset/img/post/money_letter.png';
-import newneek from 'asset/img/post/newneek.png';
-// bootstrap
-import { Modal, Button } from 'react-bootstrap';
+import { useSpring, useTransition, animated } from 'react-spring';
+import { Modal } from 'react-bootstrap';
 // components
 import PostDetailHeader from 'components/PostDetailHeader';
 import PostDetailBody from 'components/PostDetailBody';
+import Axios from 'axios';
 
 const Main = styled.main`
   position: relative;
@@ -23,6 +19,13 @@ const Main = styled.main`
 const ItemUl = styled.ul`
   list-style: none;
   padding-left: 0;
+  margin-bottom: 0;
+
+  &::after {
+    display: block;
+    content: "";
+    clear: both;
+  }
 `;
 
 const ItemLi = styled.li`
@@ -106,8 +109,15 @@ const TagLi = styled.li`
   cursor: pointer;
 `;
 
-const PaginationBox = styled.div`
+const PaginationArea = styled.div`
   text-align: center;
+  padding: 5%;
+  margin-bottom: 1.5rem;
+
+  .fade {
+    font-size: 1.5rem;
+    font-weight: 540;
+  }
 
   &:after {
     content: "";
@@ -126,95 +136,36 @@ const PaginationBtn = styled.button`
   bottom: 0;
   transform:translateX(-50%);
   transition: all ease 0.2s;
-  
-
-  &:focus {
-    outline: none;
-  }
-
-  &.bounce {
-    animation-name: bounce;
-    animation-duration: 2s;
-
-    /* 크로스브라우징 추가해야함 */
-    /* https://codepen.io/velopert/pen/PzoWpE 참고 */
-    @keyframes bounce {
-      0% {
-        opacity: .5;
-        bottom: -30px;
-      }
-      100% {
-        bottom: 0;
-      }
-    }
-  }
-`;
-
-const CustomModal = styled.div`
-  background: #f4f4f5;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  pointer-events: auto;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 1px solid #0003;
-  border-radius: .3rem;
-  outline: 0;
 `;
 
 
-function PostMain({ posts }) {
-  const postItem = [stibeeLetter, lush, newneek, moneyLetter];
-  const [currentPost, setCurrentPost] = useState({})
-  const tagDummy = ['미디어', '스타트업'];
-  const [item, setItem] = useState([]);
+function PostMain({ posts, handlePagination, endPage }) {
+  const [currentPost, setCurrentPost] = useState({});
   const [more, setMore] = useState(false);
   const [show, setShow] = useState(false);
+  // spring
+  const fade = useSpring({
+    to: [{ opacity: 1 }, { opacity: 0 }],
+    from: { opacity: 0 },
+    config: { duration: 1200 },
+  })
 
-  const paginationRef = useRef();
-  
+  const props = useSpring({
+    to: async (next, cancel) => {
+      await next({opacity: 1, color: 'orange' })
+      await next({opacity: 0, color: 'yellow' })
+    },
+    from: {opacity: 0, color: 'red', background: 'green'}
+  })
 
-  useEffect(() => {
-      setItem(posts)
-    // console.log('paginationRef: ', paginationRef.current);
-  }, [posts])
+
+  // useEffect(() => {
+  //     setItem(posts)
+  // }, [posts])
 
   const handleSelectTag = (e, tagName) => {
     e.stopPropagation();
-    console.log('tagName: ', tagName);
     
-  }
-
-  const handleBounceEffect = () => {
-    return new Promise((resolve, reject) => {
-      paginationRef.current.classList.remove('bounce');
-      // 리트리거용
-      // 콘솔로 요소의 offsetWidth를 확인 또는 아래와 같이 할당하는 경우 리트리거 발생
-      const test = paginationRef.current.offsetWidth;
-      paginationRef.current.classList.add('bounce');
-      resolve(true);
-    })
-  }
-
-  const handlePagination = () => {
-    console.log('handlePagination');
-    handleBounceEffect().then(res => {
-      console.log('next');
-      setTimeout(() => {
-        let temp = [...item];
-        postItem.map(cuItem => {
-          console.log('item: ', item);
-
-          temp = temp.concat(cuItem);
-          console.log('복사후 ', temp);
-
-        })
-        setItem(temp);
-
-      }, 500)
-    });  
   }
 
   const changeDate = (date) => {
@@ -224,52 +175,60 @@ function PostMain({ posts }) {
 
   const handleClose = () => setShow(false);
   const handleShow = (postIdx) => {
-    setCurrentPost(item[postIdx]);
+    console.log('handleShow', postIdx);
+    setCurrentPost(posts[postIdx]);
     setShow(true);
   }
 
   useEffect(() => {
+    console.log(posts.length);
+    posts.map(post => {
+      console.log('postmain', post);
+    })
     // setShow(true);
   }, [currentPost]);
 
   return (
     <Main>
       <ItemUl>
-        {
-          item.map((item, idx) => (
-            <ItemLi 
-              key={idx} 
-              onClick={() => handleShow(idx)}
-            >
-              <ItemBox>
-                <ImgBox>
-                  <ItemImg src={item.screenshot} />
-                </ImgBox>
+      {
+        posts.map((post, idx) => (
+          <ItemLi 
+            key={idx} 
+            onClick={() => handleShow(idx)}
+          >
+            <ItemBox>
+              <ImgBox>
+                <ItemImg src={post.screenshot} />
+              </ImgBox>
 
-                <ItemCont>
-                  <ContTitle>{item.title}</ContTitle>
-                  <ContCreatAt>{changeDate(item.updatedAt)}</ContCreatAt>
-                </ItemCont>
-              </ItemBox>
+              <ItemCont>
+                <ContTitle>{post.title}</ContTitle>
+                <ContCreatAt>{changeDate(post.updatedAt)}</ContCreatAt>
+              </ItemCont>
+            </ItemBox>
 
-              <TagBox>
-                <TagUl>
-                  {
-                    item.tags.map((tag, idx) => (
-                      <TagLi key={idx} onClick={(e) => handleSelectTag(e, tag)}>{tag}</TagLi>
-                    ))
-                  }
-                </TagUl>
-              </TagBox>
-            </ItemLi>
-          ))
-        }
+            <TagBox>
+              <TagUl>
+                {
+                  post.tags.map((tag, idx) => (
+                    <TagLi key={idx} onClick={(e) => handleSelectTag(e, tag)}>{tag}</TagLi>
+                  ))
+                }
+              </TagUl>
+            </TagBox>
+          </ItemLi>
+        ))
+      }
       </ItemUl>
 
-      <PaginationBox>
-        <PaginationBtn ref={paginationRef} more={more} onClick={handlePagination}>더보기</PaginationBtn>
-      </PaginationBox>
-
+      <PaginationArea>
+        {
+          endPage ?
+            <animated.div style={fade}>더 이상 데이터가 없습니다.</animated.div>
+            : <PaginationBtn more={more} onClick={() => handlePagination()}>더보기</PaginationBtn>
+        }
+      </PaginationArea>
 
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>

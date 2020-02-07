@@ -17,11 +17,15 @@
     "markdown-it-emoji": "^1.4.0",
     "react": "^16.12.0",
     "react-bootstrap": "^1.0.0-beta.16",
-    "react-color": "^2.17.3",
+    "react-color": "^2.18.0",
     "react-dom": "^16.12.0",
     "react-markdown-editor-lite": "^0.5.1",
+    "react-redux": "^7.1.3",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
+    "react-spring": "^8.0.27",
+    "react-transition-group": "^4.3.0",
+    "redux": "^4.0.5",
     "styled-components": "^4.4.1"
   },
   "scripts": {
@@ -46,6 +50,7 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^6.0.3"
+    "cross-env": "^6.0.3",
+    "redux-devtools-extension": "^2.13.8"
   }
 }

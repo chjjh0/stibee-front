@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import PostlistTagBtn from 'components/PostlistTagBtn';
+import { tagList } from 'static/tagList';
+
 
 
 const TagArea = styled.nav`
@@ -8,7 +10,7 @@ const TagArea = styled.nav`
 `;
 
 const TagListUl = styled.ul`
-  padding: 0;
+  padding: 0 120px;
 `;
 
 const TagListLi = styled.li`
@@ -16,32 +18,29 @@ const TagListLi = styled.li`
   list-style: none;
 `;
 
-const tagList = ['태그1', '태그2', '태그3', '태그4'];
-
-function TagContainer() {
-  const [selectTag, setSelectTag] = useState([]);
+function TagContainer({ fetchFindByTag }) {
   const [isActive, setIsActive] = useState('');
   
   const handleSelectTag = (tagName) => {
-    console.log('tagName: ', tagName);
+    console.log('postListcontainer tagName: ', tagName);
     setIsActive(tagName);
+    fetchFindByTag(tagName);
   }
 
   return (
     <TagArea>
       <TagListUl>
+      {
+        tagList.map((tag, idx) => (
           <TagListLi>
-            {
-              tagList.map((tag, idx) => (
-                <PostlistTagBtn 
-                  tag={tag} 
-                  key={idx}
-                  isActive={isActive === tag ? true : false}
-                  handleActive={handleSelectTag}
-                />
-              ))
-            }
+            <PostlistTagBtn 
+            tag={tag} 
+            key={idx}
+            isActive={isActive === tag ? true : false}
+            handleActive={handleSelectTag} />
           </TagListLi>
+        ))
+      }
       </TagListUl>
     </TagArea>
   )

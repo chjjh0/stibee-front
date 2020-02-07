@@ -45,7 +45,7 @@ const Gnb = styled.nav`
 
 
 
-function PostList() {
+function PostNav({ fetchFindByTag }) {
   return (
       <Post>
         <SiteSlogan>
@@ -54,10 +54,10 @@ function PostList() {
         </SiteSlogan>
 
         <Gnb>
-          <PostListTagContainer />
+          <PostListTagContainer fetchFindByTag={fetchFindByTag} />
         </Gnb>
       </Post>
   )
 }
 
-export default PostList;
+export default PostNav;

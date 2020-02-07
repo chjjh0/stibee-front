@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components';
 import beeBasic from 'asset/img/login_bee_basic.png';
 import stibeeText from 'asset/img/stibee_text.png';
 import Axios from 'axios';
+import useInputs from '../customHook/useInputs';
 
 // 클래스 관리가 모호함
 // 태그에 할 건지 아님 styled에서 처리할 건지 결정하기
@@ -70,22 +71,15 @@ const Footer = styled.footer`
 
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [{ email, password }, onChange] = useInputs({
+    email: '',
+    password: ''
+  })
+  
   const [errorMsg, setErrorMsg] = useState({ email: '', password: '' });
-
-  const handleChangeInput = (e) => {
-    console.log('chagne',e.target.name, e.target.value)
-    const { name, value } = e.target;
-
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  }
 
   const handleValid = (e) => {
     const { name } = e.target;
-    const { email, password } = formData;
 
     switch(name) {
       case 'email':
@@ -126,9 +120,9 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('로그인 submit', formData)
+    const submitData = { email, password }
 
-    Axios.post('/api/user/login', formData)
+    Axios.post('/api/user/login', submitData)
       .then(res => {
         if (res.data.success) {
           console.log('로그인 성공', res);
@@ -155,7 +149,7 @@ const LoginPage = () => {
               type="email" 
               id="email"
               name="email" 
-              onChange={handleChangeInput} 
+              onChange={onChange} 
               onBlur={handleValid} 
             />
             <ErrorMsgArea>{errorMsg.email}</ErrorMsgArea>
@@ -165,7 +159,7 @@ const LoginPage = () => {
               type="password" 
               id="password" 
               name="password"
-              onChange={handleChangeInput}
+              onChange={onChange}
               onBlur={handleValid} 
             />
             <ErrorMsgArea>{errorMsg.password}</ErrorMsgArea>

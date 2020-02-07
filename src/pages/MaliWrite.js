@@ -8,7 +8,7 @@ import MarkdownIt from 'markdown-it';
 import emoji from 'markdown-it-emoji';
 // bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 // color-picker
 import TagArea from 'containers/TagContainer';
 import ColorPicContainer from 'containers/ColorPicContainer';
@@ -67,7 +67,7 @@ const TitleInput = styled.input`
   padding: 1%;
 `;
 
-function MailWrite({ update, postId }) {
+function MailWrite({ update, match }) {
   // submit data
   const [title, setTitle] = useState('');
   const [cont, setCont] = useState({ mdCont: "", htmlCont: "" });
@@ -87,11 +87,16 @@ function MailWrite({ update, postId }) {
   const [show, setShow] = useState(false);
   
   const { mdCont, htmlCont } = cont;
-  let mdEditor = null;
+
+  const checkForUpdate = () => {
+    console.log(match.path);
+    return match.path.includes('/post/update')
+  }
 
   useEffect(function() {
-    console.log('mailWrite', update, postId)
-    if (update) {
+    console.log('mailWrite', match.path, checkForUpdate())
+    if (checkForUpdate()) {
+      console.log('forUpdate');
       fetchPostbyId();
     }
   }, [])
@@ -177,7 +182,7 @@ const convertBlobToBase64 = (blob) => {
 }
 
 const fetchPostbyId = () => {
-    Axios.post(`/api/post/postOrigin/${postId}`)
+    Axios.post(`/api/post/postOrigin/${match.params.postId}`)
       .then(res => {
         const { title, mdCont, htmlCont, tags, colors } = res.data.post
         console.log('성공', res);
@@ -269,7 +274,7 @@ const handleConvertBlobToBase64 = (imgTag) => {
     }
   })
 }
-const updateReq = () => {
+const submitUpdate = () => {
   const submitData = {
     title,
     screenshot: canvasImg,
@@ -280,11 +285,10 @@ const updateReq = () => {
   }
   
   console.log('handleupdate', submitData);
-  Axios.put(`/api/post/update/${postId}`, submitData)
+  Axios.put(`/api/post/update/${match.params.postId}`, submitData)
     .then(res => {
       console.log('update 성공', res);
     })
-
 }
 
 const handleUpdate = () => {
@@ -296,10 +300,10 @@ const handleUpdate = () => {
   } else {
     const imgTag = document.querySelectorAll('.html-wrap img');
 
+
     handleConvertBlobToBase64(imgTag)
       .then(handleScreenshot)
-      // .then(handleConvertBlobToBase64(imgTag))
-      .then(updateReq)
+      .then(submitUpdate)
   }
 }
 
@@ -309,6 +313,8 @@ const handleSave = () => {
     alert('내용을 입력해주세요.')
   } else {
     const imgTag = document.querySelectorAll('.html-wrap img');
+
+    console.log('img tag', imgTag);
 
     handleConvertBlobToBase64(imgTag)
       .then(handleScreenshot)
@@ -324,7 +330,7 @@ const handlePreview = () => {
   if (mdCont !== "") {
     // document.createElement로 생성한 형태가 html2canvas에 적용되지 않아 일단 queryselector로 진행
     const imgTag = document.querySelectorAll('.html-wrap img');
-    console.log('진입 전');
+    console.log('preview', imgTag);
     handleConvertBlobToBase64(imgTag)
       .then(handleScreenshot)
       .then(handleShow)
@@ -424,7 +430,7 @@ const handleShow = () => setShow(true);
 
       <BtnArea>
         {
-          update ? 
+          checkForUpdate() ? 
           <BasicBtn 
             func={handleUpdate}
             btnName='수정'

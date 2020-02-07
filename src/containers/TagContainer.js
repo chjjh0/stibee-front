@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import TagBtn from 'components/TagBtn';
+import { tagList } from 'static/tagList';
 
 
 const TagArea = styled.div`
@@ -41,10 +42,10 @@ const TagListLi = styled.li`
   list-style: none;
 `;
 
-const tagList = ['공공기관', '교육', '금융', '디자인', 
-                 '라이프스타일', '미디어', '법률', '비영리단체', 
-                 '스타트업', '시사', '영화제', '음악', '출판', 
-                 '커머스', '패션', '푸드'];
+// const tagList = ['공공기관', '교육', '금융', '디자인', 
+//                  '라이프스타일', '미디어', '법률', '비영리단체', 
+//                  '스타트업', '시사', '영화제', '음악', '출판', 
+//                  '커머스', '패션', '푸드'];
 
 function TagContainer({ handleTags, checkSelectTag }) {
   
