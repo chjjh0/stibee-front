@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+// lib
 import styled from 'styled-components';
-import { useSpring, useTransition, animated } from 'react-spring';
+import { useSpring, animated } from 'react-spring';
 import { Modal } from 'react-bootstrap';
+// redux
+import { useSelector, useDispatch } from 'react-redux';
+import { setTag } from '../modules/post';
 // components
 import PostDetailHeader from 'components/PostDetailHeader';
 import PostDetailBody from 'components/PostDetailBody';
-import Axios from 'axios';
+// static
+import { tagListForPostList } from '../static/tagList';
 
 const Main = styled.main`
   position: relative;
@@ -138,11 +143,22 @@ const PaginationBtn = styled.button`
   transition: all ease 0.2s;
 `;
 
+const EmptyPostArea = styled.div`
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 520;
+`;
 
-function PostMain({ posts, handlePagination, endPage }) {
+
+function PostMain({ 
+  posts, handlePagination, handlePaginationByTag, 
+  endPage, emptyPost, fetchFindByTag }) {
   const [currentPost, setCurrentPost] = useState({});
   const [more, setMore] = useState(false);
   const [show, setShow] = useState(false);
+  // redux
+  const selectedTag = useSelector(state => state.post.selectedTag);
+  const dispatch = useDispatch();
   // spring
   const fade = useSpring({
     to: [{ opacity: 1 }, { opacity: 0 }],
@@ -150,83 +166,81 @@ function PostMain({ posts, handlePagination, endPage }) {
     config: { duration: 1200 },
   })
 
-  const props = useSpring({
-    to: async (next, cancel) => {
-      await next({opacity: 1, color: 'orange' })
-      await next({opacity: 0, color: 'yellow' })
-    },
-    from: {opacity: 0, color: 'red', background: 'green'}
-  })
-
-
-  // useEffect(() => {
-  //     setItem(posts)
-  // }, [posts])
-
-  const handleSelectTag = (e, tagName) => {
-    e.stopPropagation();
-    
-  }
-
   const changeDate = (date) => {
     // "2020-01-21T18:59:36.774Z"
     return date.split('T')[0];
   }
 
+  const handleSelectTag = (e, tagName) => {
+    e.stopPropagation()
+    console.log('selectag', convertTagObj(tagName));
+    dispatch(setTag(convertTagObj(tagName)));
+    fetchFindByTag(convertTagObj(tagName));
+    console.log('끝');
+  }
+
+  const convertTagObj = (tagName) => {
+    return tagListForPostList.filter(tag => {return tag.nameKor === tagName})[0];
+  }
+
   const handleClose = () => setShow(false);
   const handleShow = (postIdx) => {
-    console.log('handleShow', postIdx);
+    console.log('postMain', posts[postIdx]);
     setCurrentPost(posts[postIdx]);
     setShow(true);
   }
-
-  useEffect(() => {
-    console.log(posts.length);
-    posts.map(post => {
-      console.log('postmain', post);
-    })
-    // setShow(true);
-  }, [currentPost]);
+  
+  const onTogglePaginationBtn = () => {
+    if (emptyPost) { return null; }
+    return (
+      (selectedTag.nameEng === 'all' && emptyPost === false) ?
+      <PaginationBtn more={more} onClick={() => handlePagination()}>더보기</PaginationBtn>
+      : <PaginationBtn more={more} onClick={() => handlePaginationByTag()}>더보기</PaginationBtn>
+    )
+  }
 
   return (
     <Main>
-      <ItemUl>
       {
-        posts.map((post, idx) => (
-          <ItemLi 
-            key={idx} 
-            onClick={() => handleShow(idx)}
-          >
-            <ItemBox>
-              <ImgBox>
-                <ItemImg src={post.screenshot} />
-              </ImgBox>
+      emptyPost ?
+        <EmptyPostArea>포스트가 없습니다.</EmptyPostArea> :
+        <ItemUl>
+        {
+          posts.map((post, idx) => (
+            <ItemLi 
+              key={idx} 
+              onClick={() => handleShow(idx)}
+            >
+              <ItemBox>
+                <ImgBox>
+                  <ItemImg src={post.screenshot} />
+                </ImgBox>
 
-              <ItemCont>
-                <ContTitle>{post.title}</ContTitle>
-                <ContCreatAt>{changeDate(post.updatedAt)}</ContCreatAt>
-              </ItemCont>
-            </ItemBox>
+                <ItemCont>
+                  <ContTitle>{post.title}</ContTitle>
+                  <ContCreatAt>{changeDate(post.updatedAt)}</ContCreatAt>
+                </ItemCont>
+              </ItemBox>
 
-            <TagBox>
-              <TagUl>
-                {
-                  post.tags.map((tag, idx) => (
-                    <TagLi key={idx} onClick={(e) => handleSelectTag(e, tag)}>{tag}</TagLi>
-                  ))
-                }
-              </TagUl>
-            </TagBox>
-          </ItemLi>
-        ))
+              <TagBox>
+                <TagUl>
+                  {
+                    post.tags.map((tag, idx) => (
+                      <TagLi key={idx} onClick={(e) => handleSelectTag(e, tag)}>{tag}</TagLi>
+                    ))
+                  }
+                </TagUl>
+              </TagBox>
+            </ItemLi>
+          ))}
+        </ItemUl>
       }
-      </ItemUl>
 
       <PaginationArea>
         {
           endPage ?
             <animated.div style={fade}>더 이상 데이터가 없습니다.</animated.div>
-            : <PaginationBtn more={more} onClick={() => handlePagination()}>더보기</PaginationBtn>
+            : onTogglePaginationBtn()
         }
       </PaginationArea>
 

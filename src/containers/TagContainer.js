@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import TagBtn from 'components/TagBtn';
-import { tagList } from 'static/tagList';
+import { tagListForPostList } from 'static/tagList';
 
 
 const TagArea = styled.div`
@@ -42,13 +42,7 @@ const TagListLi = styled.li`
   list-style: none;
 `;
 
-// const tagList = ['공공기관', '교육', '금융', '디자인', 
-//                  '라이프스타일', '미디어', '법률', '비영리단체', 
-//                  '스타트업', '시사', '영화제', '음악', '출판', 
-//                  '커머스', '패션', '푸드'];
-
-function TagContainer({ handleTags, checkSelectTag }) {
-  
+function TagContainer({ handleSelectTag, selectedTags }) {
   return (
     <TagArea className="tagArea">
       <TagBox className="tagBox">
@@ -59,13 +53,12 @@ function TagContainer({ handleTags, checkSelectTag }) {
       <TagListUl>
           <TagListLi>
             {
-              tagList.map((tag, idx) => (
+              tagListForPostList.map((tag, idx) => (
                 <TagBtn 
-                  tag={tag} 
+                  tagName={tag.nameKor} 
                   key={idx}
-                  handleToggle={handleTags}
-                  toggleActive={checkSelectTag(tag)}
-                />
+                  handleSelectTag={handleSelectTag}
+                  isActive={selectedTags.some(seletedTag => seletedTag === tag.nameKor)} />
               ))
             }
           </TagListLi>

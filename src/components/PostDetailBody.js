@@ -101,10 +101,17 @@ function PostDetailBody({ currentPost }) {
     if (window.confirm("aa")) {
       Axios.delete(`/api/post/delete/${currentPost._id}`)
         .then(res => {
-          console.log('delete: ', res);
+          // console.log('delete: ', res);
+          if (res) {
+            alert('삭제 성공')
+            window.location.reload()
+          }
+        })
+        .catch(err => {
+          console.log('삭제 err', err);
         })
     } else {
-      console.log('삭제 안해');
+      console.log('삭제 실패');
     }
     
   }

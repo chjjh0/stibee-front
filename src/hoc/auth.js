@@ -23,7 +23,7 @@ export default function (ComposedClass, required=false) {
 		}
 
 		useEffect(() => {
-			console.log('auth', props);
+			// console.log('auth', props);
 			if (required || checkCookie) checkLogin()
 		}, [])
 

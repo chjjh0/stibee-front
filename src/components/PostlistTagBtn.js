@@ -30,7 +30,7 @@ function PostlistTagBtn({ tag, isActive, handleActive }) {
       className={isActive && 'active'} 
       onClick={() => handleActive(tag)} 
     >
-      {tag}
+      {tag.nameKor}
     </TagButton>
   )
 }

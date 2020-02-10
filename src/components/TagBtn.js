@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 const TagButton = styled.button`
@@ -19,13 +19,20 @@ const TagButton = styled.button`
     }
 `;
 
-function TagBtn({ tag, toggleActive, handleToggle }) {
+
+
+function TagBtn({ tagName, isActive, handleSelectTag }) {
+
+  useEffect(() => {
+    console.log('tagBtn', isActive);
+  }, [isActive]);
+
   return (
     <TagButton 
-      className={toggleActive && 'active'} 
-      onClick={() => handleToggle(tag)} 
+      className={isActive && 'active'} 
+      onClick={() => handleSelectTag(tagName)} 
     >
-      {tag}
+      {tagName}
     </TagButton>
   )
 }

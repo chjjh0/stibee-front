@@ -10,7 +10,7 @@ import emoji from 'markdown-it-emoji';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal } from 'react-bootstrap';
 // color-picker
-import TagArea from 'containers/TagContainer';
+import TagContainer from 'containers/TagContainer';
 import ColorPicContainer from 'containers/ColorPicContainer';
 import BasicBtn from 'components/BasicBtn';
 import Axios from 'axios';
@@ -103,13 +103,19 @@ function MailWrite({ update, match }) {
 
 // func
 // tag 선택 여부에 따른 UI 활성화 효과
-const checkSelectTag = (tagName) => tags.includes(tagName);
+const checkSelectTag = (tagName) => {
+  console.log('checkSelectTag', tagName, tags);
+  return tags.includes(tagName)
+};
 
 // 선택된 tag
-const handleTags = (tag) => {
+const handleSelectTag = (tag) => {
+  console.log('mailWrite handleTags', tag);
   if (checkSelectTag(tag)) {
+    console.log('선택된 것 또 선택');
     setTags(tags.filter(prevTag => prevTag !== tag))
   } else if (tags.length < 3) {
+    console.log('선택 안된 것 선택');
     setTags([
       ...tags,
       tag
@@ -287,7 +293,11 @@ const submitUpdate = () => {
   console.log('handleupdate', submitData);
   Axios.put(`/api/post/update/${match.params.postId}`, submitData)
     .then(res => {
-      console.log('update 성공', res);
+      if (res.data.success) {
+        console.log('update 성공', res);
+      } else {
+        console.log('update 실패');
+      }
     })
 }
 
@@ -419,13 +429,12 @@ const handleShow = () => setShow(true);
         <ColorPicContainer 
           handleColorChange={handleColorChange}
           colorPicker={colors}
-          cancelColorPicker={cancelColorPicker}
-        />
+          cancelColorPicker={cancelColorPicker} />
 
-        <TagArea 
-          handleTags={handleTags} 
-          checkSelectTag={checkSelectTag}
-          />
+        <TagContainer
+          handleSelectTag={handleSelectTag}
+          selectedTags={tags} 
+          checkSelectTag={checkSelectTag} />
       </OptionArea>
 
       <BtnArea>

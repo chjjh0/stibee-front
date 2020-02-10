@@ -5,7 +5,6 @@ import PostListTagContainer from 'containers/PostListTagContainer';
 
 const Post = styled.div`
   width: 100%;
-  height: 2500px;
   padding-top: 64px;
 `;
 
@@ -45,7 +44,7 @@ const Gnb = styled.nav`
 
 
 
-function PostNav({ fetchFindByTag }) {
+function PostNav({ fetchFindByTag, fetchPost }) {
   return (
       <Post>
         <SiteSlogan>
@@ -54,7 +53,9 @@ function PostNav({ fetchFindByTag }) {
         </SiteSlogan>
 
         <Gnb>
-          <PostListTagContainer fetchFindByTag={fetchFindByTag} />
+          <PostListTagContainer 
+            fetchPost={fetchPost}
+            fetchFindByTag={fetchFindByTag} />
         </Gnb>
       </Post>
   )
