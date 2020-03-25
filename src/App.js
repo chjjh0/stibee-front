@@ -1,29 +1,28 @@
-import React, { useEffect, useState, useRef } from 'react';
-// pages
-import LoginPage from 'pages/LoginPage';
-import PostListPage from 'pages/PostListPage';
-import MailWrite from 'pages/MaliWrite';
-// components
-import Auth from 'hoc/auth';
-import PostOrigin from 'components/PostOrigin';
-// router
-import { BrowserRouter, Route } from 'react-router-dom';
+import React from 'react';
+// lib
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
+// pages
+import LoginPage from './pages/LoginPage';
+import JoinPage from './pages/JoinPage';
+import PostListPage from './pages/PostListPage';
+import PostWritePage from './pages/PostWritePage';
+import PostUpdatePage from './pages/PostUpdatePage';
+// components
+import PostViewerPage from './pages/PostViewerPage';
+// router
 
 function App() {
-
-
   return (
     <BrowserRouter>
-      <div className="App">
-        <Route exact path="/" component={Auth(LoginPage, false)} />
-        <Route exact path="/list" component={Auth(PostListPage, true)} />
-        <Route exact path="/write" component={Auth(MailWrite, true)} />
-        <Route exact path={`/post/:postId`} component={Auth(PostOrigin, false)} />
-        <Route 
-          exact path={`/post/update/:postId`} 
-          component={Auth(MailWrite, true)} />
-      </div>
+      <Switch>
+        <Route exact path="/" component={LoginPage} />
+        <Route path="/join" component={JoinPage} />
+        <Route path="/list" component={PostListPage} />
+        <Route exact path="/post/write" component={PostWritePage} />
+        <Route exact path="/post/viewer/:postId" component={PostViewerPage} />
+        <Route exact path="/post/update/:postId" component={PostUpdatePage} />
+      </Switch>
     </BrowserRouter>
   );
 }

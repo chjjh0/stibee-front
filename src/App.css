@@ -1,8 +1,0 @@
-.noData-enter {
-  opacity: 0;
-}
-
-.noData-enter-active {
-  opacity: 1;
-  transition: opacity 1s;
-}

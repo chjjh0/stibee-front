@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import PostListTagContainer from 'containers/PostListTagContainer';
-
+import PostListTagContainer from '../containers/PostListTagContainer';
 
 const Post = styled.div`
   width: 100%;
@@ -12,7 +11,7 @@ const SiteSlogan = styled.h1`
   line-height: 1.6;
   text-align: center;
   padding: 70px 0;
-  
+
   p {
     font-size: 35px;
     font-weight: normal;
@@ -42,23 +41,22 @@ const Gnb = styled.nav`
   }
 `;
 
-
-
-function PostNav({ fetchFindByTag, fetchPost }) {
+function PostNav() {
   return (
-      <Post>
-        <SiteSlogan>
-          <p>스티비로 만든 <br />다양한 이메일을 확인해보세요.</p>
-          <p>누구나 더 좋은 이메일을 만들 수 있습니다.</p>
-        </SiteSlogan>
+    <Post>
+      <SiteSlogan>
+        <p>
+          스티비로 만든 <br />
+          다양한 이메일을 확인해보세요.
+        </p>
+        <p>누구나 더 좋은 이메일을 만들 수 있습니다.</p>
+      </SiteSlogan>
 
-        <Gnb>
-          <PostListTagContainer 
-            fetchPost={fetchPost}
-            fetchFindByTag={fetchFindByTag} />
-        </Gnb>
-      </Post>
-  )
+      <Gnb>
+        <PostListTagContainer />
+      </Gnb>
+    </Post>
+  );
 }
 
 export default PostNav;

@@ -1,4 +1,4 @@
-export const tagListForPostWrite = [
+export const tagListForPostEditor = [
   { nameKor: '공공기관', nameEng: 'public' },
   { nameKor: '교육', nameEng: 'education' },
   { nameKor: '금융', nameEng: 'finance' },
@@ -16,7 +16,6 @@ export const tagListForPostWrite = [
   { nameKor: '패션', nameEng: 'fashion' },
   { nameKor: '푸드', nameEng: 'food' },
 ];
-
 
 export const tagListForPostList = [
   { nameKor: '모두보기', nameEng: 'all' },
@@ -37,12 +36,3 @@ export const tagListForPostList = [
   { nameKor: '패션', nameEng: 'fashion' },
   { nameKor: '푸드', nameEng: 'food' },
 ];
-
-
-
-/* 
-  '공공기관', '교육', '금융', '디자인', 
-  '라이프스타일', '미디어', '법률', '비영리단체', 
-  '스타트업', '시사', '영화제', '음악', '출판', 
-  '커머스', '패션', '푸드'
-*/

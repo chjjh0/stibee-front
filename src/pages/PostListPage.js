@@ -1,130 +1,100 @@
 import React, { useEffect, useState, useRef } from 'react';
-import PostHeader from 'components/PostHeader';
-import PostNav from 'components/PostNav';
-import PostMain from 'components/PostMain';
-import Axios from 'axios';
+// lib
+import { basicAl } from '../lib/alert';
+import { setPosts } from '../modules/posts';
+// components
+import PostHeader from '../components/PostHeader';
+import PostNav from '../components/PostNav';
+import PostMain from '../components/PostMain';
 // redux
 import { useSelector, useDispatch } from 'react-redux';
-import { setMorePost, setPostByTag } from '../modules/post';
+import {
+  setPostsByTag,
+  setMorePosts,
+  setMorePostsByTag,
+} from '../modules/posts';
 
-function PostListpage() {
+function PostListpage({ history }) {
   const [scrollVal, setScrollVal] = useState(false);
-  // const [posts, setPosts] = useState([]);
-  // const [currentPage, setCurrentPage] = useState(1);
   let currentPage = useRef(1);
-  const [endPage, setEndPage] = useState(false);
-  const [emptyPost, setEmptyPost] = useState(false);
   // redux
-  const posts = useSelector(state => state.post.posts);
-  const selectedTag = useSelector(state => state.post.selectedTag);
+  const user = useSelector(({ user }) => user.user);
+  const loading = useSelector(({ loading }) => loading['posts/SET_POSTS']);
+  const posts = useSelector(({ posts }) => posts.posts);
+  const selectedTag = useSelector(({ posts }) => posts.selectedTag);
+  const errorMsg = useSelector(({ posts }) => posts.errorMsg);
   const dispatch = useDispatch();
 
-  const onScroll = (e) => {
+  const onScroll = e => {
     const scrollY = window.scrollY;
+
     if (scrollY > 50) {
-      setScrollVal(true)
+      setScrollVal(true);
     } else {
-      setScrollVal(false)
+      setScrollVal(false);
     }
-  }
+  };
 
-  const settingPosts = (res, all) => {
-    if (res.data.msg === 'endPage') {
-      setEndPage(true);
-    } else if (all) {
-      // 모두보기용, posts 덮어쓰기
-      dispatch(setPostByTag(res.data.posts))
-    } else {
-      // 초기 posts 불로오기 및 더보기용
-      dispatch(setMorePost(res.data.posts));
+  const fetchPosts = (all = false) => {
+    // 모두보기 선택시에만 작동
+    if (all) {
+      currentPage.current = 1;
     }
-  }
+    dispatch(setPosts(currentPage.current));
+  };
 
-  const fetchPost = (all = false) => {
-    // 초기화 
-    setEmptyPost(false);
-    setEndPage(false);
-    // 태그 전체보기 선택시에만 작동
-    if (all) {currentPage.current = 1;}
-
-
-    Axios.get(`/api/post/list/${currentPage.current}`)
-    .then(res => {
-      // console.log('fetchpost res ', res);
-      settingPosts(res, all);
-    })
-    .catch(err => {
-      console.log('fetchpost err', err);
-    })
-  }
-
-  const fetchFindByTag = (tag) => {
-    // console.log('fetchFindByTag', tag);
-    const submitData = { tag }
-    // 현재페이지, 더보기, emptyPost 초기화
+  const fetchFindByTag = tag => {
     currentPage.current = 1;
-    setEndPage(false);
-    setEmptyPost(false);
-    // console.log('findbytag', tag, currentPage.current, selectedTag) ;
-
-    Axios.post(`/api/post/findByTag/${currentPage.current}`, submitData)
-      .then(res => {  
-        // console.log('findByTag res', res);
-        if (res.data.success) {
-          dispatch(setPostByTag(res.data.posts));
-        } else {
-          // 포스트가 없을 때
-          setEmptyPost(true);
-        }
-      })
-      .catch(err => {
-        console.log('postsByTag err', err);
-      })
-  }
+    dispatch(setPostsByTag(currentPage.current, selectedTag));
+  };
+  // 태그가 바뀌면 실행
+  useEffect(() => {
+    // 태그 기본값 = all 이라 처음에도 실행 됨
+    if (selectedTag.nameEng === 'all') {
+      fetchPosts(true);
+    } else {
+      fetchFindByTag();
+    }
+  }, [selectedTag]);
 
   const handlePagination = () => {
-    currentPage.current++
-    fetchPost();
-  }
-
-  const handlePaginationByTag = () => {
-    // console.log('handlePaginationByTag', selectedTag, currentPage.current);
-    currentPage.current++
-    
-    const submitData = { tag: selectedTag }
-
-    Axios.post(`/api/post/findByTag/${currentPage.current}`, submitData)
-      .then(res => {  
-        // console.log('handlePaginationByTag 더보기', res);
-        settingPosts(res);
-
-        // dispatch(setPostByTag(res.data.posts));
-      })
-      .catch(err => {
-        console.log('handlePaginationByTag 더보기 err', err);
-      })
-  }
+    // 더보기 버튼이 사라지긴 하지만, errMsg가 있을 때는 아예 요청을 안하게 방어코딩 해야할 듯
+    // 노드에서처럼 조건에 맞을 때 return으로 아래구문들 실행 안하게 하는 것처럼 처리하기
+    currentPage.current++;
+    if (selectedTag.nameKor === '모두보기') {
+      dispatch(setMorePosts(currentPage.current));
+    } else {
+      dispatch(setMorePostsByTag(currentPage.current, selectedTag));
+    }
+  };
 
   useEffect(() => {
-    fetchPost();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [])
+    if (!user) {
+      basicAl(() => history.push('/'), {
+        icon: 'error',
+        title: '로그인이 필요합니다.',
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <>
-      <PostHeader scrollVal={scrollVal} />
-      <PostNav 
-        fetchPost={fetchPost}
-        fetchFindByTag={fetchFindByTag} />
-      <PostMain 
-        posts={posts} 
-        handlePagination={handlePagination} 
-        handlePaginationByTag={handlePaginationByTag} 
+      <PostHeader scrollVal={scrollVal} history={history} />
+      <PostNav />
+      <PostMain
+        posts={posts}
+        loading={loading}
+        errorMsg={errorMsg}
+        handlePagination={handlePagination}
         fetchFindByTag={fetchFindByTag}
-        emptyPost={emptyPost}
-        endPage={endPage} />
+      />
     </>
-  )
+  );
 }
 
 export default PostListpage;

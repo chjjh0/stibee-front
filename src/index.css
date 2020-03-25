@@ -1,5 +1,7 @@
 body {
   margin: 0;
+  overflow: visible !important;
+
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -10,4 +12,18 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.modal-open {
+  /* padding-right: 0 !important; */
+}
+.modal-open .header-inner {
+  padding-right: 16px;
+}
+.modal-open::-webkit-scrollbar {
+  display: none;
+}
+
+.fade.modal.show::-webkit-scrollbar {
+  display: none;
 }
