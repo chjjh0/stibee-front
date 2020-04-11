@@ -22,7 +22,7 @@ function loadUser() {
     const user = localStorage.getItem('user');
     if (!user) return; // 로그인 상태가 아니라면 아무것도 안함
 
-    // localstorage에 있는 user 정보를 전달 임시로 use 세팅
+    // localstorage에 있는 user 정보를 전달 임시로 user 세팅
     // useDispatch 없이 아래와 같이 store.dispatch로 전달
     store.dispatch(tempSetUser(user));
     store.dispatch(check());
