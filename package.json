@@ -15,7 +15,7 @@
     "dom-to-image": "^2.6.0",
     "html2canvas": "^1.0.0-rc.5",
     "http-proxy-middleware": "^0.20.0",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "markdown-it-emoji": "^1.4.0",
     "react": "^16.12.0",
     "react-bootstrap": "^1.0.0-beta.16",
