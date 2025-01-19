@@ -4,9 +4,6 @@
 <br><br><br>
 
 # Demo 정보
-* URL: www.devjhlog.com
-* ID:PW: admin@stibee.com / 1qaz2wsx# 
-  ( 테스트로 회원가입을 해도 괜찮습니다😊 )
 <br><br><br>
 
 # Stack
